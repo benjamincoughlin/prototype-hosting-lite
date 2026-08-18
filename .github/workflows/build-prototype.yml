@@ -1,0 +1,102 @@
+name: Build prototype
+
+# Triggered by the admin dashboard (docs/index.html) via the Actions API,
+# or manually from the Actions tab. This is the untrusted-code execution
+# boundary: it clones and runs `npm install`/build for an admin-submitted
+# repo. Inputs are passed through `env:` (never interpolated directly into
+# `run:` via ${{ }}) to avoid shell/script injection from untrusted input.
+on:
+  workflow_dispatch:
+    inputs:
+      repo_url:
+        description: "GitHub repo URL to build"
+        required: true
+      slug:
+        description: "URL slug for this prototype (lowercase letters, numbers, hyphens)"
+        required: true
+      password_hash:
+        description: "Salted SHA-256 hash (hex) of the tester password"
+        required: true
+      password_salt:
+        description: "Random hex salt used to compute password_hash"
+        required: true
+      expires_at:
+        description: "ISO 8601 expiration timestamp, or blank for none"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.event.inputs.slug }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      REPO_URL: ${{ inputs.repo_url }}
+      SLUG: ${{ inputs.slug }}
+      PASSWORD_HASH: ${{ inputs.password_hash }}
+      PASSWORD_SALT: ${{ inputs.password_salt }}
+      EXPIRES_AT: ${{ inputs.expires_at }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate slug
+        run: |
+          if ! echo "$SLUG" | grep -Eq '^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$'; then
+            echo "Invalid slug: $SLUG" >&2
+            exit 1
+          fi
+
+      - name: Clone target repo
+        run: git clone --depth 1 "$REPO_URL" /tmp/target-repo
+
+      - name: Detect and build
+        id: detect_build
+        run: |
+          if node scripts/detect-and-build.js /tmp/target-repo /tmp/output; then
+            echo "status=LIVE" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=BUILD_FAILED" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Assemble prototype (gate page + built app)
+        if: steps.detect_build.outputs.status == 'LIVE'
+        run: |
+          node scripts/assemble-prototype.js \
+            --slug "$SLUG" \
+            --password-hash "$PASSWORD_HASH" \
+            --password-salt "$PASSWORD_SALT" \
+            --expires-at "$EXPIRES_AT" \
+            --build-output /tmp/output \
+            --dest "docs/p/$SLUG"
+
+      - name: Update manifest
+        run: |
+          node scripts/update-manifest.js \
+            --slug "$SLUG" \
+            --repo-url "$REPO_URL" \
+            --expires-at "$EXPIRES_AT" \
+            --status "${{ steps.detect_build.outputs.status }}" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      - name: Commit and push
+        run: |
+          git config user.name "prototype-hosting-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Build prototype: $SLUG (${{ steps.detect_build.outputs.status }})"
+            git push
+          fi
+
+      - name: Fail the run if the build failed
+        if: steps.detect_build.outputs.status == 'BUILD_FAILED'
+        run: exit 1
