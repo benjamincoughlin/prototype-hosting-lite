@@ -1,0 +1,7 @@
+{
+  "slug": "hosting-test2",
+  "passwordHash": "70ea0a7541afc2399a03f9485d458cb8286dee5b0992c9aa01de8df7d11e769f",
+  "passwordSalt": "427565ff476db97cb614a190b33dfee7",
+  "expiresAt": null,
+  "status": "LIVE"
+}
