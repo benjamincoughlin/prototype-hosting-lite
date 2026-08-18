@@ -73,7 +73,10 @@
 <main>
   <div class="row">
     <h1>Prototype Hosting</h1>
-    <div id="connectionStatus" class="muted"></div>
+    <div class="row" style="gap:10px">
+      <div id="connectionStatus" class="muted"></div>
+      <button class="secondary" id="changeTokenButton" style="display:none">Change token</button>
+    </div>
   </div>
 
   <div id="connectCard" class="card" style="display:none">
@@ -154,6 +157,7 @@
     connectCard: document.getElementById("connectCard"),
     appCard: document.getElementById("appCard"),
     connectionStatus: document.getElementById("connectionStatus"),
+    changeTokenButton: document.getElementById("changeTokenButton"),
     patInput: document.getElementById("patInput"),
     connectButton: document.getElementById("connectButton"),
     connectError: document.getElementById("connectError"),
@@ -450,6 +454,7 @@
       localStorage.setItem(PAT_STORAGE_KEY, token);
       const user = await res.json();
       els.connectionStatus.textContent = `Connected as ${user.login}`;
+      els.changeTokenButton.style.display = "inline-block";
       els.connectCard.style.display = "none";
       els.appCard.style.display = "block";
       await renderTable();
@@ -461,10 +466,21 @@
     }
   }
 
+  function disconnect() {
+    localStorage.removeItem(PAT_STORAGE_KEY);
+    els.patInput.value = "";
+    els.connectionStatus.textContent = "";
+    els.changeTokenButton.style.display = "none";
+    els.appCard.style.display = "none";
+    els.connectError.style.display = "none";
+    els.connectCard.style.display = "block";
+  }
+
   els.connectButton.addEventListener("click", () => {
     const token = els.patInput.value.trim();
     if (token) connect(token);
   });
+  els.changeTokenButton.addEventListener("click", disconnect);
   els.addForm.addEventListener("submit", handleAddSubmit);
   els.refreshButton.addEventListener("click", renderTable);
 
