@@ -3,8 +3,9 @@
 Password-gated hosting for coded prototypes (small React/Vite apps, static
 HTML, etc.) shared with external user-testing groups — built entirely on
 **GitHub Pages + GitHub Actions**. No server, no AWS, no DNS. Everything is
-operated by clicking buttons on the dashboard (once Step 4 lands) or the
-GitHub Actions UI.
+operated by clicking buttons on the dashboard.
+
+**Dashboard:** https://benjamincoughlin.github.io/prototype-hosting-lite/
 
 ## Important: this is soft security, not real access control
 
@@ -60,3 +61,26 @@ The dashboard calls GitHub's API directly from your browser using a
    Nothing else.
 4. Paste the token into the dashboard when prompted — it's stored only in
    your browser's local storage, never sent anywhere but GitHub's API.
+
+Once connected, the dashboard lets you:
+
+- **Add prototype** — repo URL, slug, password, optional expiration. This
+  triggers the build workflow and polls until it's live.
+- **Password** — set a new password for an existing prototype (updates
+  `config.json` directly, no rebuild needed).
+- **Expiry** — set or clear a prototype's expiration date.
+- **Take down / Reactivate** — immediately blocks/restores access (the
+  gate page checks this before showing the password form).
+- **Redeploy** — rebuilds from the repo's latest commit, keeping the same
+  password.
+
+## Status
+
+Built and verified end-to-end (build pipeline, gate page — including
+wrong-password rejection, correct-password unlock, expiration blocking
+access even with a prior unlock, and unlock state never leaking between
+different prototypes' slugs) against a real test repo. The dashboard's
+list view and error handling are verified; the authenticated "connect
+token" and "add prototype" flows need a live pass with a real PAT (can't
+be tested by an agent without exposing a real credential) — see the steps
+above.
