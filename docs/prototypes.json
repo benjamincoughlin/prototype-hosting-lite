@@ -7,5 +7,14 @@
     "createdAt": "2026-08-18T20:45:06.222Z",
     "updatedAt": "2026-08-18T20:45:06.222Z",
     "lastRunUrl": "https://github.com/benjamincoughlin/prototype-hosting-lite/actions/runs/32183979815"
+  },
+  {
+    "slug": "test-fixture-2",
+    "repoUrl": "https://github.com/benjamincoughlin/test-vite-fixture",
+    "status": "LIVE",
+    "expiresAt": null,
+    "createdAt": "2026-08-18T20:50:34.598Z",
+    "updatedAt": "2026-08-18T20:50:34.598Z",
+    "lastRunUrl": "https://github.com/benjamincoughlin/prototype-hosting-lite/actions/runs/32184484868"
   }
 ]
