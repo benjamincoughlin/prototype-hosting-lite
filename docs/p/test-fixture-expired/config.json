@@ -1,7 +1,0 @@
-{
-  "slug": "test-fixture-expired",
-  "passwordHash": "c96823398a03e34b079ad9fc937adf98a5c697010953c7555b1b19df13d47f4d",
-  "passwordSalt": "e067c4073918b90b35aaaa5dff025502",
-  "expiresAt": "2020-01-01T00:00:00Z",
-  "status": "LIVE"
-}

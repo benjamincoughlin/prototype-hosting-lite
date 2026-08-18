@@ -1,7 +1,0 @@
-{
-  "slug": "test-fixture",
-  "passwordHash": "a0291c7b705250c087d90e93271150fd31e0d222a3944fc0bd7f5d88c1fe4d57",
-  "passwordSalt": "fa391456071364bf3f3aec8a372a69ca",
-  "expiresAt": null,
-  "status": "LIVE"
-}
